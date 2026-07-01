@@ -6,6 +6,7 @@ import Header from './components/Header';
 import Home from './pages/Home';
 import SendMessage from './pages/SendMessage';
 import Messages from './pages/Messages';
+import Wellness from './pages/Wellness';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/send/:username" element={<SendMessage />} />
             <Route path="/messages" element={<Messages />} />
+            <Route path="/wellness" element={<Wellness />} />
           </Routes>
         </main>
         
