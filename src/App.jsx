@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import SendMessage from './pages/SendMessage';
 import Messages from './pages/Messages';
 import Wellness from './pages/Wellness';
+import Quiz from './pages/Quiz';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/send/:username" element={<SendMessage />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/wellness" element={<Wellness />} />
+            <Route path="/quiz" element={<Quiz />} />
           </Routes>
         </main>
         
