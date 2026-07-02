@@ -262,7 +262,7 @@
 }
 
 /* Improved text gradients */
-.bg-gradient-to-r {
+.text-gradient-rainbow {
   background: linear-gradient(90deg, #fbbf24 0%, #3b82f6 50%, #8b5cf6 100%);
   -webkit-background-clip: text;
   background-clip: text;

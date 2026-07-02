@@ -382,9 +382,9 @@ const Messages = () => {
                             <button
                               onClick={() => handleGuess(msg.id)}
                               disabled={!(guessInputs[msg.id] || '').trim()}
-                              className="bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
+                              className="bg-purple-600 hover:bg-purple-500 active:scale-95 disabled:opacity-40 disabled:scale-100 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer"
                             >
-                              ✔️ Valider
+                              Valider
                             </button>
                           </div>
                           {guessErrors[msg.id] && (

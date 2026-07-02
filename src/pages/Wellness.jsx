@@ -95,9 +95,9 @@ const Wellness = () => {
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`px-4 py-2.5 rounded-xl font-semibold transition-all duration-300 flex-shrink-0 ${selectedCategory === cat.id
-                ? 'bg-white text-[#764ba2] shadow-lg scale-105'
-                : 'text-white/80 hover:bg-white/10 hover:text-white'
+            className={`px-4 py-2.5 rounded-xl font-semibold transition-all duration-300 active:scale-95 flex-shrink-0 cursor-pointer ${selectedCategory === cat.id
+                ? 'bg-white text-[#764ba2] shadow-lg scale-105 hover:scale-[1.07]'
+                : 'text-white/80 hover:bg-white/10 hover:text-white hover:scale-[1.02]'
               }`}
           >
             {cat.label}
@@ -174,7 +174,7 @@ const Wellness = () => {
               <Button
                 onClick={fetchWellnessMessages}
                 disabled={loading}
-                className="btn-primary text-md px-6 py-3.5 rounded-xl flex items-center justify-center space-x-2 mx-auto"
+                className="btn-primary text-md px-6 py-3.5 rounded-xl flex items-center justify-center space-x-2 mx-auto transition-transform duration-200 hover:scale-[1.02] active:scale-95"
               >
                 <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
                 <span>✨ Recevoir un autre mot doux</span>

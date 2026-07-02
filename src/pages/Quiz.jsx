@@ -135,7 +135,7 @@ const Quiz = () => {
                 <button
                   key={option.id}
                   onClick={() => handleSelectMood(option.value)}
-                  className="w-full text-left bg-white/15 hover:bg-white/25 border border-white/10 hover:border-white/20 text-white font-medium p-4 rounded-xl transition-all duration-200 hover:scale-[1.01]"
+                  className="w-full text-left bg-white/15 hover:bg-white/25 border border-white/10 hover:border-white/20 text-white font-medium p-4 rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                 >
                   {option.label}
                 </button>
@@ -149,8 +149,8 @@ const Quiz = () => {
           <Card className="glass-card border border-white/10 shadow-2xl animate-fadeIn">
             <CardHeader className="text-center pb-4">
               <div className="flex justify-between items-center text-sm font-semibold uppercase tracking-wider">
-                <button onClick={() => setCurrentStep(1)} className="text-white/60 hover:text-white transition-colors">
-                  ⬅️ Retour
+                <button onClick={() => setCurrentStep(1)} className="text-white/60 hover:text-white transition-all duration-200 active:scale-95 flex items-center gap-1 cursor-pointer">
+                  <span>⬅️</span> <span>Retour</span>
                 </button>
                 <span className="text-purple-300">Question 2 sur 2</span>
               </div>
@@ -162,7 +162,7 @@ const Quiz = () => {
                 <button
                   key={option.id}
                   onClick={() => handleSelectNeed(option.value)}
-                  className="w-full text-left bg-white/15 hover:bg-white/25 border border-white/10 hover:border-white/20 text-white font-medium p-4 rounded-xl transition-all duration-200 hover:scale-[1.01]"
+                  className="w-full text-left bg-white/15 hover:bg-white/25 border border-white/10 hover:border-white/20 text-white font-medium p-4 rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                 >
                   {option.label}
                 </button>

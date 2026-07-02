@@ -116,8 +116,8 @@ const Home = () => {
 
       {/* Create Link Section - Centered and Prominent */}
       <section className="container mx-auto px-4 py-8">
-        <div className="max-w-lg mx-auto">
-          <Card className="glass-card border-2 border-white/20 shadow-2xl">
+        <div className="max-w-lg mx-auto" id="create-link-card">
+          <Card className="glass-card border-2 border-white/20 shadow-2xl transition-all duration-300">
             <CardHeader className="text-center pb-4">
               <CardTitle className="text-2xl text-white mb-2">
                 🔗 Créez votre lien personnel
@@ -149,7 +149,7 @@ const Home = () => {
 
                 <Button 
                   onClick={generateUserLink} 
-                  className="btn-primary w-full text-lg py-3 rounded-xl"
+                  className="btn-primary w-full text-lg py-3 rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-95"
                   disabled={!username.trim() || loading}
                 >
                   {loading ? "⏳ Création de ton lien..." : "✨ Générer mon lien"}
@@ -237,7 +237,7 @@ const Home = () => {
                 Un espace sûr pour l'expression authentique.
               </p>
               <Link to="/messages">
-                <Button className="btn-primary w-full">
+                <Button className="btn-primary w-full transition-all duration-200 hover:scale-[1.02] active:scale-95">
                   📬 Voir mes messages
                 </Button>
               </Link>
@@ -258,7 +258,7 @@ const Home = () => {
                 et des mots réconfortants pour illuminer votre journée.
               </p>
               <Link to="/wellness">
-                <Button className="btn-primary w-full">
+                <Button className="btn-primary w-full transition-all duration-200 hover:scale-[1.02] active:scale-95">
                   ☀️ Découvrir
                 </Button>
               </Link>
@@ -279,7 +279,7 @@ const Home = () => {
                 humeur : motivation, réconfort, encouragement.
               </p>
               <Link to="/quiz">
-                <Button className="btn-primary w-full">
+                <Button className="btn-primary w-full transition-all duration-200 hover:scale-[1.02] active:scale-95">
                   🎯 Commencer le quiz
                 </Button>
               </Link>
@@ -319,7 +319,13 @@ const Home = () => {
                 <p className="text-white/70 text-sm">Accumulez des points à chaque bonne réponse</p>
               </div>
             </div>
-            <Button className="btn-primary text-lg px-8 py-3">
+            <Button 
+              onClick={() => {
+                document.getElementById('create-link-card').scrollIntoView({ behavior: 'smooth' });
+                setTimeout(() => document.querySelector('input').focus(), 600);
+              }}
+              className="btn-primary text-lg px-8 py-3 transition-transform duration-200 active:scale-95"
+            >
               🎮 Activer le mode Gaming
             </Button>
           </CardContent>
@@ -336,7 +342,13 @@ const Home = () => {
             Rejoignez la communauté AnonyMots et découvrez la magie des messages anonymes bienveillants.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="btn-primary text-lg px-8 py-3" onClick={() => document.querySelector('input').focus()}>
+            <Button 
+              className="btn-primary text-lg px-8 py-3 transition-transform duration-200 active:scale-95" 
+              onClick={() => {
+                document.getElementById('create-link-card').scrollIntoView({ behavior: 'smooth' });
+                setTimeout(() => document.querySelector('input').focus(), 600);
+              }}
+            >
               🚀 Créer mon lien maintenant
             </Button>
             <Link to="/wellness">

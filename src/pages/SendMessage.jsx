@@ -283,7 +283,7 @@ const SendMessage = () => {
           <Button
             onClick={sendMessage}
             disabled={!message.trim() || sending || (includeClue && !senderName.trim())}
-            className="btn-primary w-full text-lg py-3.5 rounded-xl flex items-center justify-center space-x-2"
+            className="btn-primary w-full text-lg py-3.5 rounded-xl flex items-center justify-center space-x-2 transition-transform duration-200 hover:scale-[1.01] active:scale-95"
           >
             {sending ? (
               <>
