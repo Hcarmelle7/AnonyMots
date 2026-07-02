@@ -8,13 +8,14 @@ import { Checkbox } from '../components/ui/checkbox';
 
 const SendMessage = () => {
   const { username } = useParams();
-  
+
   // --- ÉTATS (STATES) ---
   const [message, setMessage] = useState('');
   const [includeClue, setIncludeClue] = useState(false);
-  const [clue, setClue] = useState('');
+  const [senderName, setSenderName] = useState('');  // Prénom secret pour valider la devinette
+  const [clue, setClue] = useState('');              // Indice optionnel (texte libre)
   const [sent, setSent] = useState(false);
-  
+
   // Nouveaux états ergonomiques
   const [checkingUser, setCheckingUser] = useState(true); // Pour savoir si on vérifie l'existence du pseudo
   const [recipientExists, setRecipientExists] = useState(false); // Vrai si le pseudo est enregistré en base
@@ -55,7 +56,7 @@ const SendMessage = () => {
 
     setSending(true);
     setErrorMsg('');
-    
+
     try {
       const response = await fetch('/api/messages', {
         method: 'POST',
@@ -67,6 +68,7 @@ const SendMessage = () => {
           content: message,
           hasClue: includeClue,
           clue: includeClue ? clue : null,
+          senderName: includeClue ? senderName : null,
         }),
       });
 
@@ -76,6 +78,7 @@ const SendMessage = () => {
         setSent(true);
         setMessage('');
         setClue('');
+        setSenderName('');
         setIncludeClue(false);
       } else {
         setErrorMsg(data.error || "Une erreur est survenue lors de l'envoi.");
@@ -140,11 +143,11 @@ const SendMessage = () => {
           </CardHeader>
           <CardContent>
             <p className="text-white/80 mb-6 text-lg">
-              Votre message anonyme a été transmis à <strong className="text-pink-300">{username}</strong> avec succès.
+              Votre message anonyme a été transmis à <strong className="text-purple-300">{username}</strong> avec succès.
             </p>
             <div className="space-y-3">
-              <Button 
-                onClick={() => setSent(false)} 
+              <Button
+                onClick={() => setSent(false)}
                 className="btn-primary w-full text-lg py-3 rounded-xl"
               >
                 Envoyer un autre message
@@ -192,7 +195,7 @@ const SendMessage = () => {
             maxLength={500}
             disabled={sending}
           />
-          
+
           <div className="text-right text-white/60 text-sm font-medium">
             {message.length}/500 caractères
           </div>
@@ -205,30 +208,67 @@ const SendMessage = () => {
                 checked={includeClue}
                 onCheckedChange={(checked) => {
                   setIncludeClue(checked);
-                  if (!checked) setClue(''); // Réinitialise l'indice si décoché
+                  if (!checked) { setClue(''); setSenderName(''); }
                 }}
                 className="border-white/40 h-5 w-5 rounded-md"
                 disabled={sending}
               />
               <label htmlFor="gaming-mode" className="text-white text-lg flex items-center space-x-2 cursor-pointer select-none">
                 <GamepadIcon size={20} className="text-purple-300" />
-                <span>Mode Gaming - Laisser un indice</span>
+                <span>Mode Gaming — Laisser deviner ton identité</span>
               </label>
             </div>
-            
+
             {includeClue && (
-              <div className="space-y-2 animate-fadeIn">
-                <Textarea
-                  placeholder="Laissez un indice subtil sur votre identité (ex: On s'est vu mardi...)"
-                  value={clue}
-                  onChange={(e) => setClue(e.target.value)}
-                  className="bg-white/20 border-white/30 text-white placeholder-white/60 p-3 rounded-xl text-base"
-                  maxLength={100}
-                  disabled={sending}
-                />
-                <p className="text-white/60 text-sm">
-                  💡 L'indice permettra au destinataire de deviner qui vous êtes et de gagner des points !
-                </p>
+              <div className="space-y-4 animate-fadeIn bg-purple-950/30 border border-purple-500/20 rounded-2xl p-4">
+
+                {/* Explication */}
+                <div className="flex items-start space-x-2 bg-purple-900/20 rounded-xl p-3 border border-purple-400/10">
+                  <span className="text-xl">🎮</span>
+                  <p className="text-white/85 text-sm leading-relaxed">
+                    <strong className="text-purple-200">Comment ça marche&nbsp;?</strong><br />
+                    Tu entres le <strong>prénom par lequel {username} te connaît</strong>. Ce prénom sera caché. {username} devra le trouver pour gagner des points. Mets donc le prénom qu'il/elle utilise réellement pour t'appeler !
+                  </p>
+                </div>
+
+                {/* Prénom secret — OBLIGATOIRE */}
+                <div className="space-y-1.5">
+                  <label className="text-purple-200 text-sm font-semibold uppercase tracking-wider flex items-center space-x-1.5">
+                    <span>🔐</span>
+                    <span>Ton prénom secret <span className="text-red-400">*</span></span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={`Le prénom que ${username} utilise pour t'appeler...`}
+                    value={senderName}
+                    onChange={(e) => setSenderName(e.target.value)}
+                    className="w-full bg-white/15 border border-purple-400/30 text-white placeholder-white/50 px-4 py-2.5 rounded-xl text-base focus:outline-none focus:border-purple-400/70"
+                    maxLength={50}
+                    disabled={sending}
+                    required
+                  />
+                  <p className="text-white/50 text-xs">
+                    ⚠️ Ce prénom restera <strong>complètement caché</strong>. {username} devra l'écrire exactement pour valider sa devinette.
+                  </p>
+                </div>
+
+                {/* Indice textuel — OPTIONNEL */}
+                <div className="space-y-1.5">
+                  <label className="text-purple-200 text-sm font-semibold uppercase tracking-wider flex items-center space-x-1.5">
+                    <span>💡</span>
+                    <span>Indice visible <span className="text-white/40">(optionnel)</span></span>
+                  </label>
+                  <textarea
+                    placeholder="Un petit indice pour aider sans trop révéler... (ex: On s'est vu mardi)"
+                    value={clue}
+                    onChange={(e) => setClue(e.target.value)}
+                    className="w-full bg-white/15 border border-purple-400/30 text-white placeholder-white/50 px-4 py-2.5 rounded-xl text-base focus:outline-none focus:border-purple-400/70 resize-none"
+                    maxLength={120}
+                    rows={2}
+                    disabled={sending}
+                  />
+                  <p className="text-white/50 text-xs">Cet indice sera affiché à {username} pour l'aider à trouver.</p>
+                </div>
               </div>
             )}
           </div>
@@ -242,7 +282,7 @@ const SendMessage = () => {
 
           <Button
             onClick={sendMessage}
-            disabled={!message.trim() || sending}
+            disabled={!message.trim() || sending || (includeClue && !senderName.trim())}
             className="btn-primary w-full text-lg py-3.5 rounded-xl flex items-center justify-center space-x-2"
           >
             {sending ? (

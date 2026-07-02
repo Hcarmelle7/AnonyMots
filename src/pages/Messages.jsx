@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, LogOut, Calendar, Gamepad2, Award, ShieldAlert, Sparkles } from 'lucide-react';
+import { MessageSquare, LogOut, Calendar, Gamepad2, Award, ShieldAlert, Sparkles, Copy, Check, Send } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -11,6 +11,11 @@ const Messages = () => {
   const [messages, setMessages] = useState([]); // Liste des messages reçus
   const [score, setScore] = useState(0); // Score du mode Gaming
   
+  // États pour le mode gaming : saisie de prénom par message
+  const [guessInputs, setGuessInputs] = useState({});   // { [messageId]: texte saisi }
+  const [guessErrors, setGuessErrors] = useState({});    // { [messageId]: message d'erreur }
+  const [copiedReply, setCopiedReply] = useState(null);  // clé unique du dernier texte copié
+
   // États techniques pour gérer l'affichage UI
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
@@ -102,32 +107,59 @@ const Messages = () => {
     setUsernameInput('');
   };
 
-  // Gérer la résolution d'un indice (Gaming Mode)
+  // Gérer la tentative de devinette (Gaming Mode)
   const handleGuess = async (messageId) => {
+    const guess = (guessInputs[messageId] || '').trim();
+    if (!guess) return;
+
+    setGuessErrors(prev => ({ ...prev, [messageId]: '' }));
+
     try {
       const response = await fetch(`/api/messages/${messageId}/guess`, {
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guess }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        
-        // 1. Mettre à jour l'état local du message pour refléter qu'il est deviné
-        setMessages(prevMessages => 
-          prevMessages.map(msg => 
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setMessages(prevMessages =>
+          prevMessages.map(msg =>
             msg.id === messageId ? { ...msg, is_guessed: 1 } : msg
           )
         );
-
-        // 2. Mettre à jour et sauvegarder le score (+10 points)
         const newScore = score + data.points;
         setScore(newScore);
         localStorage.setItem('anonymots_score', newScore.toString());
+        setGuessInputs(prev => ({ ...prev, [messageId]: '' }));
+      } else {
+        setGuessErrors(prev => ({ ...prev, [messageId]: data.message || 'Mauvais prénom. Réessaie !' }));
       }
     } catch (err) {
-      console.error("Erreur lors de la résolution de l'indice:", err);
+      console.error("Erreur lors de la tentative de devinette:", err);
+      setGuessErrors(prev => ({ ...prev, [messageId]: 'Erreur réseau. Réessaie.' }));
     }
   };
+
+  // Copier une suggestion de réponse dans le presse-papiers
+  const copyReply = async (text, key) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedReply(key);
+      setTimeout(() => setCopiedReply(null), 2500);
+    } catch (err) {
+      console.error('Erreur de copie:', err);
+    }
+  };
+
+  // Suggestions de réponse à afficher après une devinette réussie
+  const getReplySuggestions = () => [
+    `Merci pour ce message, ça m'a vraiment touché(e) ! 🥰`,
+    `Wow, je n'aurais jamais deviné ! Merci d'avoir joué avec moi 😄`,
+    `C'était toi ! Je suis tellement content(e) que tu m'aies écrit ça 💛`,
+    `Merci pour ta bienveillance, ça compte énormément pour moi 🙏`,
+  ];
 
   // --- RENDU (JSX) ---
 
@@ -274,30 +306,94 @@ const Messages = () => {
 
                   {/* Mode Gaming - Affichage des indices */}
                   {msg.has_clue === 1 && (
-                    <div className="bg-purple-950/40 border border-purple-500/20 rounded-xl p-3.5 space-y-2 mt-4">
+                    <div className="bg-purple-950/40 border border-purple-500/20 rounded-xl p-3.5 space-y-3 mt-4">
                       <div className="flex items-center space-x-2 text-purple-300 text-xs font-semibold uppercase tracking-wider">
                         <Gamepad2 size={14} />
-                        <span>Mode Gaming : Indice laissé</span>
+                        <span>Mode Gaming</span>
                       </div>
-                      
-                      <p className="text-white/90 text-sm bg-purple-900/20 p-2 rounded border border-purple-500/10">
-                        🔍 {msg.clue}
-                      </p>
 
-                      {/* Gestion de la résolution du jeu */}
+                      {/* Indice textuel (optionnel) */}
+                      {msg.clue && (
+                        <p className="text-white/90 text-sm bg-purple-900/20 p-2.5 rounded-lg border border-purple-500/10">
+                          🔍 Indice : {msg.clue}
+                        </p>
+                      )}
+
+                      {/* Zone de devinette */}
                       {msg.is_guessed === 1 ? (
-                        <div className="flex items-center space-x-1.5 text-green-300 text-xs font-semibold pt-1">
-                          <Sparkles size={12} />
-                          <span>Deviné avec succès ! (+10 pts)</span>
+                        // Panneau victoire + suggestions de réponse
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-1.5 text-green-300 text-sm font-semibold bg-green-950/30 px-3 py-2 rounded-lg border border-green-500/20">
+                            <Sparkles size={14} className="animate-pulse" />
+                            <span>Bravo ! Tu as trouvé ! +10 pts 🎉</span>
+                          </div>
+
+                          {/* Encouragement à répondre */}
+                          <div className="bg-blue-950/30 border border-blue-400/20 rounded-xl p-3 space-y-2.5">
+                            <p className="text-blue-200 text-xs font-semibold uppercase tracking-wider flex items-center space-x-1.5">
+                              <Send size={12} />
+                              <span>Et si tu lui répondais ?</span>
+                            </p>
+                            <p className="text-white/65 text-xs leading-relaxed">
+                              Tu sais maintenant qui t'a écrit ! Voici quelques suggestions de réponse à copier :
+                            </p>
+                            <div className="space-y-1.5">
+                              {getReplySuggestions().map((suggestion, idx) => {
+                                const key = `${msg.id}-reply-${idx}`;
+                                return (
+                                  <div key={idx} className="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/5 hover:border-blue-400/30 transition-colors group">
+                                    <p className="text-white/80 text-xs flex-1 leading-relaxed italic">"{suggestion}"</p>
+                                    <button
+                                      onClick={() => copyReply(suggestion, key)}
+                                      className="text-white/40 group-hover:text-blue-300 transition-colors flex-shrink-0 p-1"
+                                      title="Copier cette suggestion"
+                                    >
+                                      {copiedReply === key
+                                        ? <Check size={13} className="text-green-300" />
+                                        : <Copy size={13} />}
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <p className="text-white/35 text-[10px] text-center pt-0.5">
+                              Copie une réponse et envoie-la lui via son lien AnonyMots ou en personne 😊
+                            </p>
+                          </div>
                         </div>
                       ) : (
-                        <Button 
-                          onClick={() => handleGuess(msg.id)}
-                          size="sm"
-                          className="w-full mt-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold py-2 rounded-lg transition-colors"
-                        >
-                          🎯 J'ai deviné qui c'est !
-                        </Button>
+                        <div className="space-y-2">
+                          <p className="text-white/70 text-xs font-medium">
+                            🎯 Qui t'a envoyé ce message&nbsp;? Entre son prénom :
+                          </p>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Son prénom..."
+                              value={guessInputs[msg.id] || ''}
+                              onChange={(e) => {
+                                setGuessInputs(prev => ({ ...prev, [msg.id]: e.target.value }));
+                                if (guessErrors[msg.id]) setGuessErrors(prev => ({ ...prev, [msg.id]: '' }));
+                              }}
+                              onKeyDown={(e) => e.key === 'Enter' && handleGuess(msg.id)}
+                              className="flex-1 bg-white/10 border border-purple-400/30 text-white placeholder-white/40 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-purple-400/70"
+                              maxLength={50}
+                            />
+                            <button
+                              onClick={() => handleGuess(msg.id)}
+                              disabled={!(guessInputs[msg.id] || '').trim()}
+                              className="bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
+                            >
+                              ✔️ Valider
+                            </button>
+                          </div>
+                          {guessErrors[msg.id] && (
+                            <p className="text-red-300 text-xs font-medium flex items-center space-x-1">
+                              <span>❌</span>
+                              <span>{guessErrors[msg.id]}</span>
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}
