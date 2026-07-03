@@ -9,18 +9,16 @@ const Home = () => {
   const [username, setUsername] = useState('');
   const [userLink, setUserLink] = useState('');
   const [copied, setCopied] = useState(false);
-  
-  // Ajout de nouveaux états pour gérer le statut de la requête et les erreurs
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Modifié la fonction pour appeler l'API d'inscription en asynchrone
+  // Creation du lien utilisateur en appelant l'API backend
   const generateUserLink = async () => {
     if (!username.trim()) return;
 
     setLoading(true);
     setError('');
-    setUserLink(''); // On réinitialise le lien pour éviter les confusions
+    setUserLink('');
 
     try {
       const response = await fetch('/api/users', {
@@ -34,13 +32,12 @@ const Home = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // En cas de succès (201), on génère le lien en pointant vers l'URL du frontend (ex: localhost:5173/send/...)
+        // Enregistrement du lien absolu vers la page SendMessage du destinataire
         const frontendLink = `${window.location.origin}/send/${data.username}`;
         setUserLink(frontendLink);
-        // Sauvegarde immédiate du pseudo dans le localStorage pour connecter l'utilisateur automatiquement !
+        // Connexion automatique en sauvegardant le pseudo localement
         localStorage.setItem('anonymots_username', data.username);
       } else {
-        // Si le statut est 409, le pseudo est déjà pris
         if (response.status === 409) {
           setError("Ce pseudo est déjà pris. Choisis-en un autre !");
         } else {
@@ -48,8 +45,8 @@ const Home = () => {
         }
       }
     } catch (err) {
-      console.error('Erreur lors de la requête:', err);
-      setError("Impossible de joindre le serveur. Vérifie que le backend est bien démarré !");
+      console.error('Erreur creation utilisateur:', err);
+      setError("Impossible de joindre le serveur. Vérifie qu'il est bien démarré.");
     } finally {
       setLoading(false);
     }
@@ -61,7 +58,7 @@ const Home = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Erreur lors de la copie:', err);
+      console.error('Erreur copie presse-papiers:', err);
     }
   };
 
@@ -82,7 +79,8 @@ const Home = () => {
 
   return (
     <div className="min-h-screen relative z-10">
-      {/* Hero Section */}
+      
+      {/* Presentation principale */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
@@ -91,12 +89,11 @@ const Home = () => {
               AnonyMots
             </span>
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-3xl mx-auto leading-relaxed">
             Un espace bienveillant pour partager et recevoir des messages anonymes. 
-            Exprimez vos pensées en toute sécurité et encouragez les autres.
+            Exprimez vos pensées en toute sécurité et encouragez vos proches.
           </p>
           
-          {/* Stats */}
           <div className="flex justify-center items-center space-x-8 mb-12 text-white/80">
             <div className="flex items-center space-x-2">
               <Shield size={20} />
@@ -114,15 +111,15 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Create Link Section - Centered and Prominent */}
+      {/* Formulaire de creation du lien personnel */}
       <section className="container mx-auto px-4 py-8">
         <div className="max-w-lg mx-auto" id="create-link-card">
           <Card className="glass-card border-2 border-white/20 shadow-2xl transition-all duration-300">
             <CardHeader className="text-center pb-4">
               <CardTitle className="text-2xl text-white mb-2">
-                🔗 Créez votre lien personnel
+                Créez votre lien personnel
               </CardTitle>
-              <CardDescription className="text-white/80 text-lg">
+              <CardDescription className="text-white/85 text-lg">
                 Choisissez un pseudo unique et partagez votre lien
               </CardDescription>
             </CardHeader>
@@ -134,16 +131,15 @@ const Home = () => {
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value);
-                    if (error) setError(''); // Efface l'erreur dès que l'utilisateur modifie sa saisie
+                    if (error) setError('');
                   }}
                   className="bg-white/20 border-white/30 text-white placeholder-white/60 text-lg py-3 px-4 rounded-xl"
                   disabled={loading}
                 />
 
-                {/* Message d'erreur bien visible et stylisé si le pseudo est déjà pris */}
                 {error && (
                   <p className="text-red-300 text-sm font-medium mt-1 bg-red-950/30 p-2 rounded-lg border border-red-500/20">
-                    ⚠️ {error}
+                    {error}
                   </p>
                 )}
 
@@ -152,7 +148,7 @@ const Home = () => {
                   className="btn-primary w-full text-lg py-3 rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-95"
                   disabled={!username.trim() || loading}
                 >
-                  {loading ? "⏳ Création de ton lien..." : "✨ Générer mon lien"}
+                  {loading ? "Création de ton lien..." : "Générer mon lien"}
                 </Button>
               </div>
               
@@ -196,11 +192,11 @@ const Home = () => {
                     </div>
                   </div>
                   
-                  {/* Bouton ergonomique pour accéder directement à sa boîte aux lettres */}
+                  {/* Bouton pour aller directement voir les messages recus */}
                   <div className="pt-2 border-t border-white/10 text-center">
                     <Link to="/messages" className="block w-full">
                       <Button className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded-xl flex items-center justify-center space-x-2 shadow-lg transition-transform hover:scale-[1.02]">
-                        <span>📬 Accéder directement à ma boîte</span>
+                        <span>Accéder directement à ma boîte</span>
                       </Button>
                     </Link>
                   </div>
@@ -211,7 +207,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features Section - Better organized */}
+      {/* Grille des fonctionnalites de l'application */}
       <section className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-white mb-4">
@@ -223,7 +219,7 @@ const Home = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Messages Anonymes */}
+          {/* Boite de réception */}
           <Card className="glass-card hover:scale-105 transition-all duration-300 group">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-500/30 transition-colors">
@@ -238,13 +234,13 @@ const Home = () => {
               </p>
               <Link to="/messages">
                 <Button className="btn-primary w-full transition-all duration-200 hover:scale-[1.02] active:scale-95">
-                  📬 Voir mes messages
+                  Voir mes messages
                 </Button>
               </Link>
             </CardContent>
           </Card>
 
-          {/* Messages Bienveillants */}
+          {/* Citations bienveillantes */}
           <Card className="glass-card hover:scale-105 transition-all duration-300 group">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-yellow-500/30 transition-colors">
@@ -259,13 +255,13 @@ const Home = () => {
               </p>
               <Link to="/wellness">
                 <Button className="btn-primary w-full transition-all duration-200 hover:scale-[1.02] active:scale-95">
-                  ☀️ Découvrir
+                  Découvrir
                 </Button>
               </Link>
             </CardContent>
           </Card>
 
-          {/* Quiz Personnalisé */}
+          {/* Quiz interactif */}
           <Card className="glass-card hover:scale-105 transition-all duration-300 group">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-500/30 transition-colors">
@@ -280,7 +276,7 @@ const Home = () => {
               </p>
               <Link to="/quiz">
                 <Button className="btn-primary w-full transition-all duration-200 hover:scale-[1.02] active:scale-95">
-                  🎯 Commencer le quiz
+                  Commencer le quiz
                 </Button>
               </Link>
             </CardContent>
@@ -288,7 +284,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Gaming Feature - Special highlight */}
+      {/* Mode gaming descriptif */}
       <section className="container mx-auto px-4 py-16">
         <Card className="glass-card max-w-4xl mx-auto border-2 border-purple-400/30 shadow-2xl">
           <CardHeader className="text-center pb-6">
@@ -296,7 +292,7 @@ const Home = () => {
               <span className="text-4xl">🎮</span>
             </div>
             <CardTitle className="text-white text-3xl mb-4">Mode Gaming</CardTitle>
-            <CardDescription className="text-white/80 text-lg max-w-2xl mx-auto leading-relaxed">
+            <CardDescription className="text-white/85 text-lg max-w-2xl mx-auto leading-relaxed">
               Transformez vos messages en jeu ! Les expéditeurs peuvent laisser des indices 
               subtils sur leur identité. Devinez qui vous a écrit et gagnez des points !
             </CardDescription>
@@ -326,13 +322,13 @@ const Home = () => {
               }}
               className="btn-primary text-lg px-8 py-3 transition-transform duration-200 active:scale-95"
             >
-              🎮 Activer le mode Gaming
+              Activer le mode Gaming
             </Button>
           </CardContent>
         </Card>
       </section>
 
-      {/* CTA Section */}
+      {/* Appel à l'action bas de page */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-4xl font-bold text-white mb-6">
@@ -349,11 +345,11 @@ const Home = () => {
                 setTimeout(() => document.querySelector('input').focus(), 600);
               }}
             >
-              🚀 Créer mon lien maintenant
+              Créer mon lien maintenant
             </Button>
             <Link to="/wellness">
               <Button variant="outline" className="bg-white/20 border-white/30 text-white hover:bg-white/30 text-lg px-8 py-3">
-                💫 Explorer les messages
+                Explorer les messages
               </Button>
             </Link>
           </div>
@@ -364,4 +360,3 @@ const Home = () => {
 };
 
 export default Home;
-

@@ -8,22 +8,19 @@ import { Checkbox } from '../components/ui/checkbox';
 
 const SendMessage = () => {
   const { username } = useParams();
-
-  // --- ÉTATS (STATES) ---
+  
   const [message, setMessage] = useState('');
   const [includeClue, setIncludeClue] = useState(false);
-  const [senderName, setSenderName] = useState('');  // Prénom secret pour valider la devinette
-  const [clue, setClue] = useState('');              // Indice optionnel (texte libre)
+  const [senderName, setSenderName] = useState('');
+  const [clue, setClue] = useState('');
   const [sent, setSent] = useState(false);
+  
+  const [checkingUser, setCheckingUser] = useState(true);
+  const [recipientExists, setRecipientExists] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  // Nouveaux états ergonomiques
-  const [checkingUser, setCheckingUser] = useState(true); // Pour savoir si on vérifie l'existence du pseudo
-  const [recipientExists, setRecipientExists] = useState(false); // Vrai si le pseudo est enregistré en base
-  const [sending, setSending] = useState(false); // Pour désactiver le bouton pendant l'envoi
-  const [errorMsg, setErrorMsg] = useState(''); // Pour stocker les messages d'erreur à l'envoi
-
-  // --- EFFETS (EFFECTS) ---
-  // Vérifie si le destinataire existe en base au chargement de la page
+  // On verifie si le destinataire existe en base au montage de la page
   useEffect(() => {
     const verifyUser = async () => {
       setCheckingUser(true);
@@ -36,8 +33,7 @@ const SendMessage = () => {
           setRecipientExists(false);
         }
       } catch (err) {
-        console.error("Erreur vérification destinataire:", err);
-        // Si le serveur est injoignable, on préfère être prudent
+        console.error("Erreur de verification utilisateur:", err);
         setRecipientExists(false);
         setErrorMsg("Impossible de joindre le serveur pour valider ce pseudo.");
       } finally {
@@ -50,13 +46,13 @@ const SendMessage = () => {
     }
   }, [username]);
 
-  // --- ACTIONS ---
+  // Envoi du message anonyme avec ou sans mode gaming
   const sendMessage = async () => {
     if (!message.trim()) return;
 
     setSending(true);
     setErrorMsg('');
-
+    
     try {
       const response = await fetch('/api/messages', {
         method: 'POST',
@@ -85,25 +81,23 @@ const SendMessage = () => {
       }
     } catch (error) {
       console.error('Erreur lors de l\'envoi:', error);
-      setErrorMsg("Erreur réseau. Vérifie que le serveur est démarré.");
+      setErrorMsg("Erreur reseau. Verifie que le serveur est bien demarre.");
     } finally {
       setSending(false);
     }
   };
 
-  // --- RENDU (JSX) ---
-
-  // ÉCRAN 1 : Chargement (vérification du pseudo en base)
+  // Ecran de chargement initial
   if (checkingUser) {
     return (
       <div className="container mx-auto px-4 py-16 relative z-10 flex flex-col items-center justify-center min-h-[50vh]">
         <Loader2 className="text-white animate-spin mb-4" size={48} />
-        <p className="text-white text-xl">Vérification de l'utilisateur en cours...</p>
+        <p className="text-white text-xl">Validation du destinataire...</p>
       </div>
     );
   }
 
-  // ÉCRAN 2 : Le destinataire n'existe pas en base de données
+  // Ecran d'erreur si l'utilisateur n'existe pas en base
   if (!recipientExists) {
     return (
       <div className="container mx-auto px-4 py-16 relative z-10">
@@ -112,17 +106,17 @@ const SendMessage = () => {
             <AlertCircle className="text-red-300 mx-auto mb-4" size={64} />
             <CardTitle className="text-white text-2xl">Destinataire introuvable</CardTitle>
             <CardDescription className="text-white/80 text-lg">
-              Le pseudo <strong className="text-pink-300">"{username}"</strong> n'est pas enregistré sur AnonyMots.
+              Le pseudo <strong className="text-pink-300">"{username}"</strong> n'est pas inscrit sur AnonyMots.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <p className="text-white/70">
-              Vérifie l'orthographe du lien ou demande à ton ami(e) de te renvoyer son pseudo correct !
+              Verifie l'orthographe du lien ou demande à ton ami(e) de te le renvoyer.
             </p>
             <div className="space-y-3">
               <Link to="/">
-                <Button className="btn-primary w-full text-lg py-3 rounded-xl">
-                  🏠 Retourner à l'accueil
+                <Button className="btn-primary w-full text-lg py-3 rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-95">
+                  Retourner à l'accueil
                 </Button>
               </Link>
             </div>
@@ -132,7 +126,7 @@ const SendMessage = () => {
     );
   }
 
-  // ÉCRAN 3 : Succès d'envoi du message
+  // Ecran de confirmation d'envoi reussi
   if (sent) {
     return (
       <div className="container mx-auto px-4 py-16 relative z-10">
@@ -146,14 +140,14 @@ const SendMessage = () => {
               Votre message anonyme a été transmis à <strong className="text-purple-300">{username}</strong> avec succès.
             </p>
             <div className="space-y-3">
-              <Button
-                onClick={() => setSent(false)}
-                className="btn-primary w-full text-lg py-3 rounded-xl"
+              <Button 
+                onClick={() => setSent(false)} 
+                className="btn-primary w-full text-lg py-3 rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-95"
               >
                 Envoyer un autre message
               </Button>
               <Link to="/">
-                <Button variant="outline" className="w-full bg-white/20 border-white/30 text-white hover:bg-white/30 text-lg py-3 rounded-xl">
+                <Button variant="outline" className="w-full bg-white/20 border-white/30 text-white hover:bg-white/30 text-lg py-3 rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-95">
                   Créer mon propre lien
                 </Button>
               </Link>
@@ -164,14 +158,14 @@ const SendMessage = () => {
     );
   }
 
-  // ÉCRAN 4 : Formulaire d'envoi standard (L'utilisateur existe)
+  // Formulaire principal d'envoi de message
   return (
     <div className="container mx-auto px-4 py-8 relative z-10">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-white mb-4">
           Envoyer un message à <span className="text-pink-200">{username}</span>
         </h1>
-        <p className="text-xl text-white/90">
+        <p className="text-xl text-white/95">
           Votre message sera complètement anonyme
         </p>
       </div>
@@ -195,12 +189,12 @@ const SendMessage = () => {
             maxLength={500}
             disabled={sending}
           />
-
+          
           <div className="text-right text-white/60 text-sm font-medium">
             {message.length}/500 caractères
           </div>
 
-          {/* Mode Gaming */}
+          {/* Configuration du mode Gaming */}
           <div className="border-t border-white/15 pt-6 space-y-4">
             <div className="flex items-center space-x-3">
               <Checkbox
@@ -221,21 +215,20 @@ const SendMessage = () => {
 
             {includeClue && (
               <div className="space-y-4 animate-fadeIn bg-purple-950/30 border border-purple-500/20 rounded-2xl p-4">
-
-                {/* Explication */}
+                
                 <div className="flex items-start space-x-2 bg-purple-900/20 rounded-xl p-3 border border-purple-400/10">
-                  <span className="text-xl">🎮</span>
+                  <GamepadIcon size={18} className="text-purple-300 mt-0.5 shrink-0" />
                   <p className="text-white/85 text-sm leading-relaxed">
-                    <strong className="text-purple-200">Comment ça marche&nbsp;?</strong><br />
-                    Tu entres le <strong>prénom par lequel {username} te connaît</strong>. Ce prénom sera caché. {username} devra le trouver pour gagner des points. Mets donc le prénom qu'il/elle utilise réellement pour t'appeler !
+                    <strong className="text-purple-200">Comment ça marche ?</strong><br/>
+                    Tu entres le prénom par lequel {username} te connaît. Ce prénom sera masqué. {username} devra le saisir correctement pour remporter des points.
                   </p>
                 </div>
 
-                {/* Prénom secret — OBLIGATOIRE */}
+                {/* Champ prénom secret obligatoire */}
                 <div className="space-y-1.5">
                   <label className="text-purple-200 text-sm font-semibold uppercase tracking-wider flex items-center space-x-1.5">
-                    <span>🔐</span>
-                    <span>Ton prénom secret <span className="text-red-400">*</span></span>
+                    <span>Ton prénom secret</span>
+                    <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -248,18 +241,17 @@ const SendMessage = () => {
                     required
                   />
                   <p className="text-white/50 text-xs">
-                    ⚠️ Ce prénom restera <strong>complètement caché</strong>. {username} devra l'écrire exactement pour valider sa devinette.
+                    Ce prénom restera caché. Il sert uniquement à valider la devinette.
                   </p>
                 </div>
 
-                {/* Indice textuel — OPTIONNEL */}
+                {/* Indice visible optionnel */}
                 <div className="space-y-1.5">
                   <label className="text-purple-200 text-sm font-semibold uppercase tracking-wider flex items-center space-x-1.5">
-                    <span>💡</span>
-                    <span>Indice visible <span className="text-white/40">(optionnel)</span></span>
+                    <span>Indice visible (optionnel)</span>
                   </label>
                   <textarea
-                    placeholder="Un petit indice pour aider sans trop révéler... (ex: On s'est vu mardi)"
+                    placeholder="Un petit indice pour l'aiguiller... (ex: On s'est vu mardi)"
                     value={clue}
                     onChange={(e) => setClue(e.target.value)}
                     className="w-full bg-white/15 border border-purple-400/30 text-white placeholder-white/50 px-4 py-2.5 rounded-xl text-base focus:outline-none focus:border-purple-400/70 resize-none"
@@ -267,16 +259,15 @@ const SendMessage = () => {
                     rows={2}
                     disabled={sending}
                   />
-                  <p className="text-white/50 text-xs">Cet indice sera affiché à {username} pour l'aider à trouver.</p>
+                  <p className="text-white/50 text-xs">Cet indice sera affiché directement sur le message.</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Affichage des erreurs à la soumission */}
           {errorMsg && (
             <p className="text-red-300 text-sm font-medium bg-red-950/30 p-3 rounded-lg border border-red-500/20">
-              ⚠️ {errorMsg}
+              {errorMsg}
             </p>
           )}
 
@@ -300,15 +291,15 @@ const SendMessage = () => {
         </CardContent>
       </Card>
 
-      {/* Suggestion de création de lien */}
+      {/* Raccourci de creation de lien */}
       <Card className="glass-card max-w-2xl mx-auto mt-8 border border-white/10">
         <CardContent className="text-center py-6">
-          <p className="text-white/80 mb-4 text-base">
+          <p className="text-white/85 mb-4 text-base">
             Vous aussi, créez votre lien personnel pour recevoir des messages anonymes !
           </p>
           <Link to="/">
-            <Button className="btn-primary font-semibold">
-              ✨ Créer mon lien AnonyMots
+            <Button className="btn-primary font-semibold transition-all duration-200 hover:scale-[1.01] active:scale-95">
+              Créer mon lien AnonyMots
             </Button>
           </Link>
         </CardContent>
@@ -318,4 +309,3 @@ const SendMessage = () => {
 };
 
 export default SendMessage;
-
