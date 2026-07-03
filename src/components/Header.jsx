@@ -4,7 +4,7 @@ import { Heart, MessageCircle, Smile, HelpCircle, Home, Menu, X } from 'lucide-r
 
 const Header = () => {
   const location = useLocation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // gestion du menu burger mobile
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
     { path: '/', icon: Home, label: 'Accueil' },
@@ -13,14 +13,13 @@ const Header = () => {
     { path: '/quiz', icon: HelpCircle, label: 'Quiz' },
   ];
 
-  // ferme le tiroir de navigation mobile
   const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <header className="glass-card rounded-t-none rounded-b-2xl border-x-0 border-t-0 p-4 relative z-50">
+    <header className="glass-card mx-4 p-4 relative z-50">
       <div className="flex items-center justify-between">
         
-        {/* clic sur le logo redirige vers l'accueil */}
+        {/* Logo cliquable pour retourner à l'accueil */}
         <Link to="/" onClick={closeMenu} className="flex items-center space-x-2 hover:opacity-90 transition-opacity">
           <Heart className="text-pink-500 animate-pulse" size={32} fill="currentColor" />
           <h1 className="text-2xl font-bold text-white tracking-wide">AnonyMots</h1>
@@ -61,7 +60,7 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Navigation Mobile - S'affiche uniquement si isMenuOpen est Vrai */}
+      {/* Navigation Mobile */}
       {isMenuOpen && (
         <nav className="md:hidden mt-4 pt-4 border-t border-white/10 flex flex-col space-y-2 animate-fadeIn">
           {navItems.map((item) => {

@@ -9,16 +9,16 @@ const Home = () => {
   const [username, setUsername] = useState('');
   const [userLink, setUserLink] = useState('');
   const [copied, setCopied] = useState(false);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Creation du lien utilisateur en appelant l'API backend
   const generateUserLink = async () => {
     if (!username.trim()) return;
 
     setLoading(true);
     setError('');
-    setUserLink('');
+    setUserLink(''); 
 
     try {
       const response = await fetch('/api/users', {
@@ -32,10 +32,8 @@ const Home = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Enregistrement du lien absolu vers la page SendMessage du destinataire
         const frontendLink = `${window.location.origin}/send/${data.username}`;
         setUserLink(frontendLink);
-        // Connexion automatique en sauvegardant le pseudo localement
         localStorage.setItem('anonymots_username', data.username);
       } else {
         if (response.status === 409) {
@@ -45,8 +43,8 @@ const Home = () => {
         }
       }
     } catch (err) {
-      console.error('Erreur creation utilisateur:', err);
-      setError("Impossible de joindre le serveur. Vérifie qu'il est bien démarré.");
+      console.error('Erreur lors de la requête:', err);
+      setError("Impossible de joindre le serveur. Vérifie que le backend est bien démarré !");
     } finally {
       setLoading(false);
     }
@@ -58,7 +56,7 @@ const Home = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Erreur copie presse-papiers:', err);
+      console.error('Erreur lors de la copie:', err);
     }
   };
 
@@ -79,8 +77,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen relative z-10">
-      
-      {/* Presentation principale */}
+      {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
@@ -89,11 +86,12 @@ const Home = () => {
               AnonyMots
             </span>
           </h1>
-          <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
             Un espace bienveillant pour partager et recevoir des messages anonymes. 
-            Exprimez vos pensées en toute sécurité et encouragez vos proches.
+            Exprimez vos pensées en toute sécurité et encouragez les autres.
           </p>
           
+          {/* Stats */}
           <div className="flex justify-center items-center space-x-8 mb-12 text-white/80">
             <div className="flex items-center space-x-2">
               <Shield size={20} />
@@ -111,7 +109,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Formulaire de creation du lien personnel */}
+      {/* Create Link Section - Centered and Prominent */}
       <section className="container mx-auto px-4 py-8">
         <div className="max-w-lg mx-auto" id="create-link-card">
           <Card className="glass-card border-2 border-white/20 shadow-2xl transition-all duration-300">
@@ -119,7 +117,7 @@ const Home = () => {
               <CardTitle className="text-2xl text-white mb-2">
                 Créez votre lien personnel
               </CardTitle>
-              <CardDescription className="text-white/85 text-lg">
+              <CardDescription className="text-white/80 text-lg">
                 Choisissez un pseudo unique et partagez votre lien
               </CardDescription>
             </CardHeader>
@@ -131,12 +129,14 @@ const Home = () => {
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value);
-                    if (error) setError('');
+                    if (error) setError(''); // Efface l'erreur dès que l'utilisateur modifie sa saisie
                   }}
                   className="bg-white/20 border-white/30 text-white placeholder-white/60 text-lg py-3 px-4 rounded-xl"
                   disabled={loading}
                 />
 
+                {/* Message d'erreur bien visible et stylisé si le pseudo est déjà pris */}
+                {/* Affichage des erreurs éventuelles */}
                 {error && (
                   <p className="text-red-300 text-sm font-medium mt-1 bg-red-950/30 p-2 rounded-lg border border-red-500/20">
                     {error}
@@ -148,7 +148,7 @@ const Home = () => {
                   className="btn-primary w-full text-lg py-3 rounded-xl transition-all duration-200 hover:scale-[1.01] active:scale-95"
                   disabled={!username.trim() || loading}
                 >
-                  {loading ? "Création de ton lien..." : "Générer mon lien"}
+                  {loading ? "Création du lien..." : "Générer mon lien"}
                 </Button>
               </div>
               
@@ -192,7 +192,7 @@ const Home = () => {
                     </div>
                   </div>
                   
-                  {/* Bouton pour aller directement voir les messages recus */}
+                  {/* Accès rapide à la boîte de réception */}
                   <div className="pt-2 border-t border-white/10 text-center">
                     <Link to="/messages" className="block w-full">
                       <Button className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded-xl flex items-center justify-center space-x-2 shadow-lg transition-transform hover:scale-[1.02]">
@@ -207,7 +207,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Grille des fonctionnalites de l'application */}
+      {/* Section des fonctionnalités */}
       <section className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-white mb-4">
@@ -219,7 +219,7 @@ const Home = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Boite de réception */}
+          {/* Messages Anonymes */}
           <Card className="glass-card hover:scale-105 transition-all duration-300 group">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-500/30 transition-colors">
@@ -240,7 +240,7 @@ const Home = () => {
             </CardContent>
           </Card>
 
-          {/* Citations bienveillantes */}
+          {/* Messages Bienveillants */}
           <Card className="glass-card hover:scale-105 transition-all duration-300 group">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-yellow-500/30 transition-colors">
@@ -261,7 +261,7 @@ const Home = () => {
             </CardContent>
           </Card>
 
-          {/* Quiz interactif */}
+          {/* Quiz Personnalisé */}
           <Card className="glass-card hover:scale-105 transition-all duration-300 group">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-500/30 transition-colors">
@@ -284,33 +284,27 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Mode gaming descriptif */}
+      {/* Section Mode Gaming */}
       <section className="container mx-auto px-4 py-16">
         <Card className="glass-card max-w-4xl mx-auto border-2 border-purple-400/30 shadow-2xl">
           <CardHeader className="text-center pb-6">
-            <div className="w-20 h-20 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-4xl">🎮</span>
-            </div>
-            <CardTitle className="text-white text-3xl mb-4">Mode Gaming</CardTitle>
-            <CardDescription className="text-white/85 text-lg max-w-2xl mx-auto leading-relaxed">
-              Transformez vos messages en jeu ! Les expéditeurs peuvent laisser des indices 
-              subtils sur leur identité. Devinez qui vous a écrit et gagnez des points !
+            <CardTitle className="text-white text-3xl mb-4">Mode Jeu</CardTitle>
+            <CardDescription className="text-white/80 text-lg max-w-2xl mx-auto leading-relaxed">
+              Jouez avec vos amis ! Les expéditeurs peuvent laisser des indices 
+              subtils sur leur identité. Devinez qui vous a écrit et gagnez des points.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div className="text-center">
-                <div className="text-2xl mb-2">🕵️</div>
                 <h4 className="text-white font-semibold mb-2">Indices Subtils</h4>
                 <p className="text-white/70 text-sm">Les expéditeurs laissent des indices créatifs</p>
               </div>
               <div className="text-center">
-                <div className="text-2xl mb-2">🎯</div>
                 <h4 className="text-white font-semibold mb-2">Devinez l'Identité</h4>
                 <p className="text-white/70 text-sm">Utilisez votre intuition pour découvrir qui c'est</p>
               </div>
               <div className="text-center">
-                <div className="text-2xl mb-2">🏆</div>
                 <h4 className="text-white font-semibold mb-2">Gagnez des Points</h4>
                 <p className="text-white/70 text-sm">Accumulez des points à chaque bonne réponse</p>
               </div>
@@ -322,13 +316,13 @@ const Home = () => {
               }}
               className="btn-primary text-lg px-8 py-3 transition-transform duration-200 active:scale-95"
             >
-              Activer le mode Gaming
+              Activer le mode Jeu
             </Button>
           </CardContent>
         </Card>
       </section>
 
-      {/* Appel à l'action bas de page */}
+      {/* Appel à l'action final */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-4xl font-bold text-white mb-6">
@@ -360,3 +354,4 @@ const Home = () => {
 };
 
 export default Home;
+

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { HelpCircle, Sparkles, Copy, Check, RotateCcw, Heart, Loader2 } from 'lucide-react';
+import { HelpCircle, Sparkles, Copy, Check, RotateCcw, Heart, Smile } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
 const Quiz = () => {
-  const [currentStep, setCurrentStep] = useState(1); // 1 = mood selection, 2 = needs, 3 = loading/result
-  const [selectedMood, setSelectedMood] = useState('');
-  const [selectedNeed, setSelectedNeed] = useState('');
-  const [resultMessage, setResultMessage] = useState('');
+  const [currentStep, setCurrentStep] = useState(1); 
+  const [selectedMood, setSelectedMood] = useState(''); 
+  const [selectedNeed, setSelectedNeed] = useState(''); 
+  const [resultMessage, setResultMessage] = useState(''); 
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -45,7 +45,7 @@ const Quiz = () => {
 
   const handleSelectNeed = async (needValue) => {
     setSelectedNeed(needValue);
-    setCurrentStep(3);
+    setCurrentStep(3); 
     setLoading(true);
     setError('');
 
@@ -89,14 +89,13 @@ const Quiz = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Erreur copie message:", err);
+      console.error("Erreur de copie:", err);
     }
   };
 
   return (
     <div className="container mx-auto px-4 py-8 relative z-10">
       
-      {/* En-tete du module de quiz */}
       <div className="text-center max-w-2xl mx-auto mb-8">
         <div className="inline-flex items-center justify-center p-3 bg-purple-500/20 rounded-full mb-4 border border-purple-400/20">
           <HelpCircle className="text-purple-300" size={32} />
@@ -111,7 +110,7 @@ const Quiz = () => {
 
       <div className="max-w-lg mx-auto">
         
-        {/* Choix de l'humeur */}
+        {/* Question 1 */}
         {currentStep === 1 && (
           <Card className="glass-card border border-white/10 shadow-2xl animate-fadeIn">
             <CardHeader className="text-center pb-4">
@@ -133,7 +132,7 @@ const Quiz = () => {
           </Card>
         )}
 
-        {/* Choix du besoin */}
+        {/* Question 2 */}
         {currentStep === 2 && (
           <Card className="glass-card border border-white/10 shadow-2xl animate-fadeIn">
             <CardHeader className="text-center pb-4">
@@ -160,17 +159,18 @@ const Quiz = () => {
           </Card>
         )}
 
-        {/* Resultat de l'evaluation */}
+        {/* Résultats */}
         {currentStep === 3 && (
           <div className="animate-fadeIn">
             
             {loading && (
-              <Card className="glass-card text-center py-12 border border-white/10 flex flex-col items-center justify-center space-y-4">
-                <Loader2 className="text-purple-300 animate-spin" size={48} />
-                <CardTitle className="text-white text-2xl">Préparation de ta bulle...</CardTitle>
-                <p className="text-white/70">
-                  Nous sélectionnons un message inspirant adapté à ton humeur du moment.
-                </p>
+              <Card className="glass-card text-center py-12 border border-white/10">
+                <CardContent className="space-y-6">
+                  <CardTitle className="text-white text-2xl">Préparation de ta bulle...</CardTitle>
+                  <p className="text-white/70">
+                    Nous sélectionnons un message inspirant adapté à ton humeur du moment.
+                  </p>
+                </CardContent>
               </Card>
             )}
 
@@ -185,9 +185,11 @@ const Quiz = () => {
               </Card>
             )}
 
+            {/* Affichage du message personnalisé en cas de succès */}
             {!loading && !error && resultMessage && (
               <Card className="glass-card border-2 border-purple-400/25 shadow-2xl relative overflow-hidden">
                 
+                {/* Décoration d'arrière-plan */}
                 <div className="absolute top-[-20%] right-[-10%] w-32 h-32 bg-pink-500/20 rounded-full blur-2xl pointer-events-none"></div>
                 <div className="absolute bottom-[-20%] left-[-10%] w-32 h-32 bg-purple-500/20 rounded-full blur-2xl pointer-events-none"></div>
 
@@ -202,6 +204,7 @@ const Quiz = () => {
                 </CardHeader>
 
                 <CardContent className="space-y-6 pt-2">
+                  {/* Le message personnalisé */}
                   <div className="bg-white/10 border border-white/15 rounded-2xl p-6 relative">
                     <Heart className="absolute top-2 left-3 text-pink-400/10" size={48} fill="currentColor" />
                     <p className="text-white text-lg md:text-xl font-medium italic leading-relaxed text-center relative z-10">
@@ -209,6 +212,7 @@ const Quiz = () => {
                     </p>
                   </div>
 
+                  {/* Boutons d'actions (Copier & Recommencer) */}
                   <div className="flex flex-col sm:flex-row gap-3 pt-2">
                     <Button
                       onClick={copyToClipboard}
