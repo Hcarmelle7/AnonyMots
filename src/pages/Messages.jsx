@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, LogOut, Calendar, Gamepad2, Award, ShieldAlert, Sparkles, Copy, Check, Send, AlertTriangle } from 'lucide-react';
+import { MessageSquare, LogOut, Calendar, Gamepad2, Award, ShieldAlert, Sparkles, Copy, Check, Send, AlertTriangle, Heart } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
