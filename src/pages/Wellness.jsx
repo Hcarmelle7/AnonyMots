@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Smile, Sparkles, Copy, Check, RefreshCw, Heart } from 'lucide-react';
+import { Smile, Sparkles, Copy, Check, RefreshCw, Heart, Loader2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader } from '../components/ui/card';
+import AdSense from '../components/AdSense';
 
 const Wellness = () => {
-  const [messages, setMessages] = useState([]); 
-  const [selectedCategory, setSelectedCategory] = useState('tous'); 
-  const [copiedId, setCopiedId] = useState(null); 
-
+  const [messages, setMessages] = useState([]); // stocke les citations (on affiche la premiere)
+  const [selectedCategory, setSelectedCategory] = useState('tous');
+  const [copiedId, setCopiedId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Liste des categories d'onglets pour filtrer
   const categories = [
     { id: 'tous', label: 'Tous', dbValue: '' },
     { id: 'motivation', label: 'Motivation', dbValue: 'motivation' },
@@ -20,11 +21,12 @@ const Wellness = () => {
     { id: 'espoir', label: 'Espoir', dbValue: 'espoir' },
   ];
 
-  // Charger une nouvelle citation dès que la catégorie change
+  // Charge une citation des que la categorie change
   useEffect(() => {
     fetchWellnessMessages();
   }, [selectedCategory]);
 
+  // Recupere les citations depuis le backend
   const fetchWellnessMessages = async () => {
     setLoading(true);
     setError('');
@@ -41,11 +43,11 @@ const Wellness = () => {
         const data = await response.json();
         setMessages(data);
       } else {
-        setError("Impossible de charger les messages bienveillants.");
+        setError("Impossible de charger les messages.");
       }
     } catch (err) {
-      console.error("Erreur chargement wellness:", err);
-      setError("Erreur réseau. Vérifie que le serveur est bien démarré.");
+      console.error("Erreur chargement citations:", err);
+      setError("Erreur reseau. Verifie que le serveur est bien demarre.");
     } finally {
       setLoading(false);
     }
@@ -62,24 +64,22 @@ const Wellness = () => {
   };
 
   const currentMsg = messages[0];
-  return (
-    <div className="container mx-auto px-4 py-8 relative z-10">
 
-      {/* En-tête de la page */}
-      <div className="text-center max-w-2xl mx-auto mb-8">
-        {/* <div className="inline-flex items-center justify-center p-3 bg-pink-500/20 rounded-full mb-4 border border-pink-400/20">
-          <Smile className="text-pink-300" size={32} />
-        </div> */}
-        <h1 className="text-4xl font-bold text-white mb-3">
+  return (
+    <div className="container mx-auto px-4 py-6 relative z-10">
+
+      {/* Titre et description de la page */}
+      <div className="text-center max-w-2xl mx-auto mb-6">
+        <h1 className="text-4xl font-bold text-white mb-2">
           Bulles de Bienveillance
         </h1>
-        <p className="text-lg text-white/80 leading-relaxed">
+        <p className="text-base text-white/85 leading-relaxed">
           Prends un instant pour lire ce mot doux. Sélectionne une catégorie selon ton humeur et laisse-toi inspirer.
         </p>
       </div>
 
-      {/* Catégories */}
-      <div className="max-w-3xl mx-auto mb-10 flex flex-row overflow-x-auto whitespace-nowrap scrollbar-none gap-2 bg-white/10 backdrop-blur-md border border-white/20 p-2 rounded-2xl select-none scroll-smooth">
+      {/* Liste d'onglets horizontaux sur une seule ligne */}
+      <div className="max-w-3xl mx-auto mb-6 flex flex-row overflow-x-auto whitespace-nowrap scrollbar-none gap-2 bg-white/10 backdrop-blur-md border border-white/20 p-2 rounded-2xl select-none scroll-smooth">
         {categories.map((cat) => (
           <button
             key={cat.id}
@@ -94,10 +94,15 @@ const Wellness = () => {
         ))}
       </div>
 
+      {/* Publicité en ligne visible immédiatement */}
+      <AdSense adSlot="8877665544" className="max-w-md mx-auto mb-6" />
+
+      {/* Zone principale d'affichage de la carte unique */}
       <div className="max-w-md mx-auto">
 
         {loading && messages.length === 0 && (
-          <div className="text-center py-20 bg-white/10 rounded-3xl border border-white/10 backdrop-blur-md">
+          <div className="text-center py-20 bg-white/10 rounded-3xl border border-white/10 backdrop-blur-md flex flex-col items-center justify-center space-y-4">
+            <Loader2 className="text-pink-300 animate-spin" size={48} />
             <p className="text-white text-lg font-medium">Sélection d'une pensée inspirante...</p>
           </div>
         )}
@@ -114,11 +119,12 @@ const Wellness = () => {
         {!loading && !error && messages.length > 0 && currentMsg && (
           <div className="space-y-6">
 
-            <Card className="glass-card border-2 border-pink-400/25 shadow-2xl relative overflow-hidden min-h-[260px] flex flex-col justify-between p-6 hover:translate-y-[-2px] transition-all duration-300">
+            <Card className="glass-card border-2 border-pink-400/25 shadow-2xl relative overflow-hidden min-h-[140px] flex flex-col justify-between p-4 hover:translate-y-[-2px] transition-all duration-300">
+
               <div className="absolute top-[-10%] right-[-10%] w-24 h-24 bg-pink-500/10 rounded-full blur-2xl pointer-events-none"></div>
               <div className="absolute bottom-[-10%] left-[-10%] w-24 h-24 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
-              <div className="flex justify-between items-center mb-4 relative z-10">
+              <div className="flex justify-between items-center mb-2 relative z-10">
                 <span className="bg-white/15 border border-white/10 text-white/90 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                   {categories.find(c => c.dbValue === currentMsg.category)?.label || currentMsg.category}
                 </span>
@@ -138,9 +144,9 @@ const Wellness = () => {
                 </Button>
               </div>
 
-              <div className="flex-1 flex flex-col justify-center py-4 relative z-10">
+              <div className="flex-1 flex flex-col justify-center py-2 relative z-10">
                 <Heart className="absolute top-0 left-2 text-pink-400/5" size={56} fill="currentColor" />
-                <p className="text-white text-xl sm:text-2xl font-semibold italic leading-relaxed text-center relative z-10">
+                <p className="text-white text-lg sm:text-xl font-semibold italic leading-relaxed text-center relative z-10">
                   "{currentMsg.content}"
                 </p>
               </div>

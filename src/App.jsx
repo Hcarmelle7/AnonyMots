@@ -13,7 +13,7 @@ import Quiz from './pages/Quiz';
 function App() {
   return (
     <Router>
-      <div className="gradient-bg min-h-screen pb-16 pt-4">
+      <div className="gradient-bg min-h-screen pb-16">
         <FloatingHearts />
         <Header />
         <main>
@@ -26,6 +26,7 @@ function App() {
           </Routes>
         </main>
         
+        {/* Widget flottant d'espace publicitaire AdSense */}
         <AdSense className="fixed bottom-4 right-4 z-40 max-w-[280px] min-h-[100px] p-4 m-0 shadow-2xl rounded-xl hidden sm:flex" />
       </div>
     </Router>
