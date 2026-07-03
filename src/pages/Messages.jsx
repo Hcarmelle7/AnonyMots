@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, LogOut, Calendar, Gamepad2, Award, ShieldAlert, Sparkles, Copy, Check, Send, AlertTriangle, Heart } from 'lucide-react';
+import { MessageSquare, LogOut, Calendar, Gamepad2, Award, ShieldAlert, Sparkles, Copy, Check, Send, AlertTriangle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -115,7 +115,7 @@ const Messages = () => {
       if (response.ok && data.success) {
         setMessages(prevMessages =>
           prevMessages.map(msg =>
-            msg.id === messageId ? { ...msg, is_guessed: 1, sender_name: data.senderName } : msg
+            msg.id === messageId ? { ...msg, is_guessed: 1 } : msg
           )
         );
         const newScore = score + data.points;
@@ -204,7 +204,7 @@ const Messages = () => {
       <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 md:p-6 mb-8 gap-4">
         <div className="flex items-center space-x-4">
           <div className="w-12 h-12 bg-pink-500/20 rounded-full flex items-center justify-center border border-pink-400/30">
-            <Heart className="text-pink-400" size={24} fill="currentColor" />
+            <span className="text-xl">🌸</span>
           </div>
           <div>
             <h2 className="text-white font-bold text-xl">Boîte de {currentUsername}</h2>
@@ -229,8 +229,10 @@ const Messages = () => {
         </div>
       </div>
 
-      {/* Publicité en ligne visible immédiatement */}
-      <AdSense adSlot="9988776655" className="max-w-4xl mx-auto mb-6" />
+      {/* Bannière AdSense à forte visibilité */}
+      <div className="max-w-4xl mx-auto mb-6">
+        <AdSense className="shadow-md rounded-xl m-0 w-full" />
+      </div>
 
       <div className="max-w-4xl mx-auto">
         {loading && messages.length === 0 && (
@@ -253,9 +255,7 @@ const Messages = () => {
         {!loading && !messagesError && messages.length === 0 && (
           <Card className="glass-card text-center py-12 max-w-xl mx-auto border-2 border-white/15">
             <CardContent className="space-y-6">
-              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="text-white/60" size={32} />
-              </div>
+              <div className="text-5xl">💌</div>
               <CardTitle className="text-white text-2xl">Boîte vide pour le moment</CardTitle>
               <p className="text-white/70">
                 Vous n'avez pas encore reçu de message. Partagez votre lien pour en recevoir !
@@ -278,8 +278,12 @@ const Messages = () => {
                       <Calendar size={12} />
                       <span>{new Date(msg.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                     </span>
-                    <span className="bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase">
-                      {msg.is_guessed === 1 && msg.sender_name ? msg.sender_name : "Anonyme"}
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase ${
+                      msg.is_guessed === 1 ? 'bg-green-500/20 text-green-300' : 'bg-pink-500/20 text-pink-300'
+                    }`}>
+                      {msg.is_guessed === 1 && msg.sender_name 
+                        ? `De : ${msg.sender_name.charAt(0).toUpperCase() + msg.sender_name.slice(1)}` 
+                        : 'Anonyme'}
                     </span>
                   </div>
                 </CardHeader>
@@ -310,36 +314,32 @@ const Messages = () => {
                             <span>Bravo ! Prénom trouvé ! +10 pts</span>
                           </div>
 
-                          <div className="bg-blue-950/30 border border-blue-400/20 rounded-xl p-3 space-y-2.5">
+                          {/* Zone de réponse rapide sous forme de puces cliquables compactes */}
+                          <div className="bg-blue-950/30 border border-blue-400/20 rounded-xl p-3 space-y-2">
                             <p className="text-blue-200 text-xs font-semibold uppercase tracking-wider flex items-center space-x-1.5">
                               <Send size={12} />
-                              <span>Et si vous lui répondiez ?</span>
+                              <span>Lui envoyer une réponse ? (clique pour copier)</span>
                             </p>
-                            <p className="text-white/65 text-xs leading-relaxed">
-                              Vous pouvez lui envoyer un mot en retour. Voici des idées prêtes à copier :
-                            </p>
-                            <div className="space-y-1.5">
+                            <div className="flex flex-wrap gap-1.5 pt-1">
                               {getReplySuggestions().map((suggestion, idx) => {
                                 const key = `${msg.id}-reply-${idx}`;
+                                const isCopied = copiedReply === key;
                                 return (
-                                  <div key={idx} className="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/5 hover:border-blue-400/30 transition-colors group">
-                                    <p className="text-white/80 text-xs flex-1 leading-relaxed italic">"{suggestion}"</p>
-                                    <button
-                                      onClick={() => copyReply(suggestion, key)}
-                                      className="text-white/40 group-hover:text-blue-300 transition-colors flex-shrink-0 p-1"
-                                      title="Copier cette suggestion"
-                                    >
-                                      {copiedReply === key
-                                        ? <Check size={13} className="text-green-300" />
-                                        : <Copy size={13} />}
-                                    </button>
-                                  </div>
+                                  <button
+                                    key={idx}
+                                    onClick={() => copyReply(suggestion, key)}
+                                    className={`text-xs px-2.5 py-1.5 rounded-lg border transition-all duration-200 cursor-pointer flex items-center space-x-1.5 ${
+                                      isCopied 
+                                        ? 'bg-green-500/20 border-green-500/30 text-green-300 scale-95' 
+                                        : 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10 hover:border-blue-400/30 active:scale-95'
+                                    }`}
+                                  >
+                                    {isCopied && <Check size={12} />}
+                                    <span>{isCopied ? 'Copié !' : suggestion}</span>
+                                  </button>
                                 );
                               })}
                             </div>
-                            <p className="text-white/35 text-[10px] text-center pt-0.5">
-                              Copiez une suggestion pour lui envoyer sur son propre lien.
-                            </p>
                           </div>
                         </div>
                       ) : (
