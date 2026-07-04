@@ -1,9 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { MessageSquare, LogOut, Calendar, Gamepad2, Award, ShieldAlert, Sparkles, Copy, Check, Send, AlertTriangle, Heart, ChevronDown, ChevronUp, Share2, Download, Link2, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { MessageSquare, LogOut, Calendar, Gamepad2, Award, ShieldAlert, Sparkles, Copy, Check, Send, AlertTriangle, Heart, ChevronDown, ChevronUp, Share2, Download, Link2, X, Palette } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import AdSense from '../components/AdSense';
+
+// ==========================================
+// THÈMES DE COULEURS POUR LES CARTES DE PARTAGE (20 THÈMES PREMIUM)
+// Vous pouvez cliquer sur le bouton palette de la prévisualisation pour en changer.
+// ==========================================
+const CARD_THEMES = [
+  // Favoris initiaux (très agréables et lumineux)
+  { name: 'Ciel & Rose ', colors: ['#87CEEB', '#DDA0DD', '#FFB6C1'], isLight: false },
+  { name: 'Crépuscule d\'Or ', colors: ['#FF5E62', '#FF9966', '#FFD97D'], isLight: false },
+
+  // 1. Dégradés Sombres / Mystiques
+  { name: 'Nuit Pourpre ', colors: ['#12072B', '#090317', '#020005'], isLight: false },
+  { name: 'Abysse Bleue ', colors: ['#0A192F', '#020C1B', '#00040A'], isLight: false },
+  { name: 'Obsidienne ', colors: ['#1A1A1A', '#0D0D0D', '#000000'], isLight: false },
+  { name: 'Vortex Néon ', colors: ['#2E0854', '#1A0033', '#0A0015'], isLight: false },
+  { name: 'Forêt Sombre ', colors: ['#0A1F13', '#030D07', '#000000'], isLight: false },
+
+  // 2. Dégradés Colorés & Vibrants (Sombres)
+  { name: 'Aurore Violette ', colors: ['#4A154B', '#2C0E37', '#12001B'], isLight: false },
+  { name: 'Galaxie Rose ', colors: ['#6B114D', '#3F052D', '#1A0013'], isLight: false },
+  { name: 'Cyberpunk', colors: ['#00F2FE', '#4FACFE', '#000000'], isLight: false },
+  { name: 'Magma Flamboyant', colors: ['#833AB4', '#FD1D1D', '#FCB045'], isLight: false },
+  { name: 'Canyon Orange', colors: ['#4E1C02', '#220800', '#000000'], isLight: false },
+
+  // 3. Dégradés Lumineux / Clairs (isLight: true)
+  { name: 'Rêve de Pêche ', colors: ['#FFEDD5', '#FED7AA', '#FDBA74'], isLight: true },
+  { name: 'Menthe Fraîche', colors: ['#ECFDF5', '#D1FAE5', '#A7F3D0'], isLight: true },
+  { name: 'Pastel Lilas ', colors: ['#F3E8FF', '#E9D5FF', '#D8B4FE'], isLight: true },
+  { name: 'Ciel Matinal ', colors: ['#E0F2FE', '#BAE6FD', '#7DD3FC'], isLight: true },
+  { name: 'Coquillage ', colors: ['#FFF7ED', '#FFE4E6', '#FECDD3'], isLight: true },
+  { name: 'Sable d\'Or', colors: ['#FEF9C3', '#FEF08A', '#FDE047'], isLight: true },
+  { name: 'Bulle de Gomme', colors: ['#FCE7F3', '#FBCFE8', '#F9A8D4'], isLight: true },
+  { name: 'Brouillard Blanc ', colors: ['#F8FAFC', '#E2E8F0', '#CBD5E1'], isLight: true },
+  { name: 'Thé Vert', colors: ['#F0FDF4', '#DCFCE7', '#BBF7D0'], isLight: true },
+  { name: 'Lumière d\'Été ', colors: ['#FFFBEB', '#FEF3C7', '#FDE68A'], isLight: true }
+];
 
 const Messages = () => {
   const [usernameInput, setUsernameInput] = useState('');
@@ -20,6 +56,9 @@ const Messages = () => {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [replyText, setReplyText] = useState('');
+
+  // Index du thème de couleur sélectionné pour le partage des messages
+  const [selectedThemeIndex, setSelectedThemeIndex] = useState(0);
 
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
@@ -149,23 +188,23 @@ const Messages = () => {
   };
 
   // Génération dynamique de l'image de la carte (format 1:1 carré pour les Posts / Status)
-  const generateCardImage = (content, username, reply) => {
+  const generateCardImage = (content, username, reply, theme) => {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
       canvas.width = 1080;
       canvas.height = 1080; // Ratio 1:1 Carré (1080x1080)
       const ctx = canvas.getContext('2d');
 
-      // 1. Fond Dégradé (Bleu ciel -> Violet -> Rose)
+      // 1. Fond Dégradé basé sur le thème
       const gradient = ctx.createLinearGradient(0, 0, 0, 1080);
-      gradient.addColorStop(0, '#87CEEB');
-      gradient.addColorStop(0.5, '#DDA0DD');
-      gradient.addColorStop(1, '#FFB6C1');
+      gradient.addColorStop(0, theme.colors[0]);
+      gradient.addColorStop(0.5, theme.colors[1]);
+      gradient.addColorStop(1, theme.colors[2]);
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 1080, 1080);
 
       // Cœurs décoratifs en arrière-plan (adaptés au format carré)
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.fillStyle = theme.isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.15)';
       const drawHeart = (x, y, size) => {
         ctx.beginPath();
         ctx.moveTo(x, y + size / 4);
@@ -217,7 +256,7 @@ const Messages = () => {
         const replyWords = reply.trim().split(' ');
         let replyLine = '';
         const replyMaxWidth = 720;
-        
+
         for (let n = 0; n < replyWords.length; n++) {
           const testLine = replyLine + replyWords[n] + ' ';
           ctx.font = 'bold 36px sans-serif';
@@ -238,7 +277,7 @@ const Messages = () => {
       const textHeight = lines.length * computedLineHeight + (replyHeight > 0 ? replyHeight + 60 : 0);
       const cardPadding = 240; // Espace pour guillemets, marge et watermark
       const cardHeight = Math.min(650, Math.max(380, textHeight + cardPadding));
-      
+
       const cardX = 90;
       const cardY = (1080 - cardHeight) / 2 - 40; // Centré avec léger décalage vers le haut
       const cardWidth = 900;
@@ -250,8 +289,8 @@ const Messages = () => {
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 20;
 
-      // Remplissage blanc transparent
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+      // Remplissage transparent de la carte (sombre ou clair)
+      ctx.fillStyle = theme.isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.25)';
       ctx.beginPath();
       if (ctx.roundRect) {
         ctx.roundRect(cardX, cardY, cardWidth, cardHeight, radius);
@@ -260,9 +299,9 @@ const Messages = () => {
       }
       ctx.fill();
 
-      // Bordure blanche subtile
+      // Bordure subtile
       ctx.shadowColor = 'transparent';
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.strokeStyle = theme.isLight ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.4)';
       ctx.lineWidth = 4;
       ctx.stroke();
 
@@ -278,7 +317,7 @@ const Messages = () => {
       const topBadgeY = cardY - topBadgeH / 2;
       const topBadgeR = 37;
 
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = theme.isLight ? '#1F0033' : '#FFFFFF';
       ctx.beginPath();
       if (ctx.roundRect) {
         ctx.roundRect(topBadgeX, topBadgeY, topBadgeW, topBadgeH, topBadgeR);
@@ -290,20 +329,20 @@ const Messages = () => {
       // Texte de la bannière
       ctx.shadowColor = 'transparent';
       ctx.font = 'bold 26px sans-serif';
-      ctx.fillStyle = '#DDA0DD';
+      ctx.fillStyle = theme.isLight ? '#FFFFFF' : '#DDA0DD';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('POSE-MOI UNE QUESTION 💭', 1080 / 2, topBadgeY + topBadgeH / 2);
+      ctx.fillText('POSE-MOI UNE QUESTION', 1080 / 2, topBadgeY + topBadgeH / 2);
 
       // 3. Dessin du message original (haut de la carte)
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = theme.isLight ? '#1F0033' : '#FFFFFF';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = `italic ${fontSize}px sans-serif`;
 
       const topHeight = cardHeight - (replyHeight > 0 ? replyHeight + 60 : 0);
       const textY = cardY + 110 + (topHeight - 150) / 2;
-      
+
       let currentY = textY - ((lines.length - 1) * computedLineHeight) / 2;
       for (let i = 0; i < lines.length; i++) {
         ctx.fillText(lines[i].trim(), textX, currentY);
@@ -321,7 +360,7 @@ const Messages = () => {
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 6;
 
-        ctx.fillStyle = '#FFFFFF';
+        ctx.fillStyle = theme.isLight ? '#1F0033' : '#FFFFFF';
         ctx.beginPath();
         if (ctx.roundRect) {
           ctx.roundRect(replyX, replyY, replyW, replyHeight, 24);
@@ -332,7 +371,7 @@ const Messages = () => {
 
         ctx.shadowColor = 'transparent';
         ctx.font = 'bold 36px sans-serif';
-        ctx.fillStyle = '#DDA0DD';
+        ctx.fillStyle = theme.isLight ? '#FFFFFF' : '#DDA0DD';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -345,7 +384,7 @@ const Messages = () => {
 
       // Marque AnonyMots en bas de carte
       ctx.font = 'bold 28px sans-serif';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fillStyle = theme.isLight ? 'rgba(0, 0, 0, 0.45)' : 'rgba(255, 255, 255, 0.7)';
       ctx.fillText('AnonyMots 💖', 1080 / 2, cardY + cardHeight - 65);
 
       // 5. Badge d'appel à l'action en dessous de la carte
@@ -355,7 +394,7 @@ const Messages = () => {
       const badgeY = Math.min(970, cardY + cardHeight + 25);
       const badgeR = 40;
 
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = theme.isLight ? '#1F0033' : '#FFFFFF';
       ctx.beginPath();
       if (ctx.roundRect) {
         ctx.roundRect(badgeX, badgeY, badgeW, badgeH, badgeR);
@@ -365,7 +404,7 @@ const Messages = () => {
       ctx.fill();
 
       ctx.font = 'bold 26px sans-serif';
-      ctx.fillStyle = '#DDA0DD';
+      ctx.fillStyle = theme.isLight ? '#FFFFFF' : '#DDA0DD';
       ctx.fillText(`Écris-moi sur : anonymots.com/send/${username}`, 1080 / 2, badgeY + badgeH / 2);
 
       resolve(canvas.toDataURL('image/png'));
@@ -374,7 +413,8 @@ const Messages = () => {
 
   const handleShare = async (msg) => {
     try {
-      const dataUrl = await generateCardImage(msg.content, currentUsername, replyText);
+      const currentTheme = CARD_THEMES[selectedThemeIndex];
+      const dataUrl = await generateCardImage(msg.content, currentUsername, replyText, currentTheme);
       const res = await fetch(dataUrl);
       const blob = await res.blob();
       const file = new File([blob], `anonymots-${msg.id}.png`, { type: 'image/png' });
@@ -404,7 +444,8 @@ const Messages = () => {
 
   const handleDownload = async (msg) => {
     try {
-      const dataUrl = await generateCardImage(msg.content, currentUsername, replyText);
+      const currentTheme = CARD_THEMES[selectedThemeIndex];
+      const dataUrl = await generateCardImage(msg.content, currentUsername, replyText, currentTheme);
       const link = document.createElement('a');
       link.download = `anonymots-${msg.id}.png`;
       link.href = dataUrl;
@@ -483,7 +524,7 @@ const Messages = () => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-6">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <div className="flex items-center space-x-2 bg-purple-500/20 border border-purple-400/30 rounded-xl px-4 py-2">
             <Award className="text-purple-300" size={20} />
             <span className="text-white font-bold">{score} pts</span>
@@ -492,7 +533,7 @@ const Messages = () => {
           <Button
             onClick={handleLogout}
             variant="ghost"
-            className="text-white/80 hover:text-white hover:bg-white/10 rounded-full flex items-center space-x-2 transition-all duration-200 hover:scale-[1.01] active:scale-95"
+            className="text-white/80 hover:text-white hover:bg-white/10 rounded-full flex items-center space-x-2 transition-all duration-200 hover:scale-[1.01] active:scale-95 animate-fadeIn"
           >
             <LogOut size={16} />
             <span>Se déconnecter</span>
@@ -667,7 +708,7 @@ const Messages = () => {
                     </div>
                   )}
                   {/* Bouton de Partage large et très visible */}
-                  <Button 
+                  <Button
                     onClick={() => {
                       setSharingMessage(msg);
                       setReplyText(''); // Réinitialise le texte de réponse
@@ -703,38 +744,62 @@ const Messages = () => {
             </div>
 
             {/* Aperçu en temps réel */}
-            <div className="flex justify-center py-2">
-              <div className="w-[210px] h-[210px] rounded-xl overflow-hidden relative shadow-lg flex flex-col justify-between p-3.5 select-none text-center bg-gradient-to-b from-[#87CEEB] via-[#DDA0DD] to-[#FFB6C1] aspect-square">
+            <div className="flex justify-center py-2 relative">
+              <div
+                className="w-[210px] h-[210px] rounded-xl overflow-hidden relative shadow-lg flex flex-col justify-between p-3.5 select-none text-center aspect-square transition-all duration-300"
+                style={{ background: `linear-gradient(to bottom, ${CARD_THEMES[selectedThemeIndex].colors[0]}, ${CARD_THEMES[selectedThemeIndex].colors[1]}, ${CARD_THEMES[selectedThemeIndex].colors[2]})` }}
+              >
+                {/* Bouton discret pour changer le theme de la carte */}
+                <button
+                  onClick={() => setSelectedThemeIndex((prev) => (prev + 1) % CARD_THEMES.length)}
+                  className={`absolute top-3 right-3 ${CARD_THEMES[selectedThemeIndex].isLight ? 'bg-black/20 hover:bg-black/30 border-black/25 text-black' : 'bg-white/20 hover:bg-white/30 border-white/25 text-white'} rounded-full p-1.5 border transition-all shadow-md active:scale-90 cursor-pointer z-30 flex items-center justify-center`}
+                  title="Changer de thème"
+                >
+                  <Palette size={12} />
+                </button>
+
                 <div className="absolute inset-0 opacity-20 flex items-center justify-center pointer-events-none">
                   {/* Cœurs décoratifs */}
                 </div>
 
                 <div className="relative z-10 w-full h-full flex flex-col justify-between">
                   <div className="flex-grow flex flex-col justify-center">
-                    <div className="bg-white/20 border border-white/30 rounded-lg p-2 mx-0.5 shadow-sm backdrop-blur-[2px] flex flex-col justify-center relative min-h-[95px]">
+                    <div className={`border rounded-lg p-2 mx-0.5 shadow-sm backdrop-blur-[2px] flex flex-col justify-center relative min-h-[90px] ${CARD_THEMES[selectedThemeIndex].isLight
+                        ? 'bg-black/5 border-black/10 text-slate-800'
+                        : 'bg-white/20 border-white/30 text-white'
+                      }`}>
                       {/* Bannière capsule chevauchant le haut */}
-                      <div className="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-white text-[#DDA0DD] text-[6px] font-bold py-1 px-3 rounded-full shadow-md uppercase tracking-wider whitespace-nowrap z-20">
-                        Pose-moi une question 
+                      <div className={`absolute w-[130px] -top-3.5 left-1/2 transform -translate-x-1/2 text-[6px] font-bold py-1 px-3 rounded-full shadow-md tracking-wider whitespace-wrap z-20 ${CARD_THEMES[selectedThemeIndex].isLight
+                        ? 'bg-slate-800 text-white'
+                        : 'bg-white text-[#DDA0DD]'
+                        }`}>
+                        Avouez-moi tout. Anonymement, ou avec un petit indice !
                       </div>
 
                       {/* Guillemet décoratif */}
-                      <span className="text-white/40 text-2xl leading-none font-serif block">“</span>
+                      <span className={`text-2xl leading-none font-serif block ${CARD_THEMES[selectedThemeIndex].isLight ? 'text-black/15' : 'text-white/40'
+                        }`}>“</span>
 
-                      <p className="text-white text-[9px] font-medium leading-relaxed italic line-clamp-4 items-center justify-center">
+                      <p className="text-[9px] font-medium leading-relaxed italic line-clamp-4 items-center justify-center">
                         {sharingMessage.content}
                       </p>
 
                       {/* Aperçu de la réponse en direct */}
                       {replyText.trim() && (
-                        <div className="bg-white text-[#DDA0DD] font-bold text-[8px] py-1 px-2 rounded-lg shadow-sm mt-1 animate-fadeIn text-center mx-1 break-words">
+                        <div className={`font-bold text-[8px] py-1.5 px-2 rounded-lg shadow-sm mt-2 animate-fadeIn text-center mx-1 break-words ${CARD_THEMES[selectedThemeIndex].isLight
+                            ? 'bg-slate-800 text-white'
+                            : 'bg-white text-[#DDA0DD]'
+                          }`}>
                           {replyText}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-full py-1 px-2 mt-2 shadow-sm flex items-center justify-center">
-                    <span className="text-[7px] font-bold text-[#DDA0DD] tracking-wide truncate max-w-full">
+                  <div className={`rounded-full py-1 px-2 mt-2 shadow-sm flex items-center justify-center ${CARD_THEMES[selectedThemeIndex].isLight ? 'bg-slate-800' : 'bg-white'
+                    }`}>
+                    <span className={`text-[7px] font-bold tracking-wide truncate max-w-full ${CARD_THEMES[selectedThemeIndex].isLight ? 'text-pink-300' : 'text-[#DDA0DD]'
+                      }`}>
                       anonymots.com/send/{currentUsername}
                     </span>
                   </div>
@@ -750,7 +815,7 @@ const Messages = () => {
                 placeholder="Écrivez votre réponse ici (optionnel)..."
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
-                className="w-full bg-white/10 border border-white/20 text-white placeholder-white/45 px-3 py-2 rounded-xl text-sm focus:outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400 transition-all duration-200"
+                className="w-full bg-white/10 border border-white/20 text-white placeholder-white/45 px-3 py-2.5 rounded-xl text-sm focus:outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400 transition-all duration-200"
                 maxLength={120}
               />
             </div>
