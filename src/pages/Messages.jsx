@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageSquare, LogOut, Calendar, Gamepad2, Award, ShieldAlert, Sparkles, Copy, Check, Send, AlertTriangle, Heart, ChevronDown, ChevronUp, Share2, Download, Link2, X, Palette } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
