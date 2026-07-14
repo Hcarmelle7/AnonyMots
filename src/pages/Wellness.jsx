@@ -1,33 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Smile, Sparkles, Copy, Check, RefreshCw, Heart, Loader2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader } from '../components/ui/card';
 import AdSense from '../components/AdSense';
 
+// Liste statique des categories d'onglets pour filtrer
+// Déclarée à l'extérieur du composant pour éviter d'être recréée à chaque rendu.
+const categories = [
+  { id: 'tous', label: 'Tous', dbValue: '' },
+  { id: 'motivation', label: 'Motivation', dbValue: 'motivation' },
+  { id: 'relaxation', label: 'Relaxation', dbValue: 'relaxation' },
+  { id: 'encouragement', label: 'Encouragement', dbValue: 'encouragement' },
+  { id: 'compassion', label: 'Compassion', dbValue: 'compassion' },
+  { id: 'espoir', label: 'Espoir', dbValue: 'espoir' },
+];
+
 const Wellness = () => {
-  const [messages, setMessages] = useState([]); // stocke les citations (on affiche la premiere)
+  const [messages, setMessages] = useState([]); // stocke les 5 citations reçues
+  const [currentIndex, setCurrentIndex] = useState(0); // index de la citation affichée actuellement
   const [selectedCategory, setSelectedCategory] = useState('tous');
   const [copiedId, setCopiedId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Liste des categories d'onglets pour filtrer
-  const categories = [
-    { id: 'tous', label: 'Tous', dbValue: '' },
-    { id: 'motivation', label: 'Motivation', dbValue: 'motivation' },
-    { id: 'relaxation', label: 'Relaxation', dbValue: 'relaxation' },
-    { id: 'encouragement', label: 'Encouragement', dbValue: 'encouragement' },
-    { id: 'compassion', label: 'Compassion', dbValue: 'compassion' },
-    { id: 'espoir', label: 'Espoir', dbValue: 'espoir' },
-  ];
-
-  // Charge une citation des que la categorie change
-  useEffect(() => {
-    fetchWellnessMessages();
-  }, [selectedCategory]);
-
   // Recupere les citations depuis le backend
-  const fetchWellnessMessages = async () => {
+  const fetchWellnessMessages = useCallback(async () => {
     setLoading(true);
     setError('');
 
@@ -51,7 +48,13 @@ const Wellness = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory]);
+
+  // Charge une citation des que la categorie change et réinitialise l'index du cache
+  useEffect(() => {
+    setCurrentIndex(0);
+    fetchWellnessMessages();
+  }, [selectedCategory, fetchWellnessMessages]);
 
   const copyToClipboard = async (text, id) => {
     try {
@@ -63,7 +66,18 @@ const Wellness = () => {
     }
   };
 
-  const currentMsg = messages[0];
+  // Permet de passer à la citation suivante dans notre cache local (lot de 5).
+  // Si on arrive à la fin de notre lot de 5, on réinitialise l'index et on en recharge 5 nouvelles.
+  const handleNextMessage = () => {
+    if (currentIndex < messages.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+    } else {
+      setCurrentIndex(0);
+      fetchWellnessMessages();
+    }
+  };
+
+  const currentMsg = messages[currentIndex];
 
   return (
     <div className="container mx-auto px-4 py-6 relative z-10">
@@ -155,7 +169,7 @@ const Wellness = () => {
 
             <div className="text-center pt-4">
               <Button
-                onClick={fetchWellnessMessages}
+                onClick={handleNextMessage}
                 disabled={loading}
                 className="btn-primary text-md px-6 py-3.5 rounded-xl flex items-center justify-center space-x-2 mx-auto transition-transform duration-200 hover:scale-[1.02] active:scale-95"
               >
