@@ -765,8 +765,8 @@ const Messages = () => {
                 <div className="relative z-10 w-full h-full flex flex-col justify-between">
                   <div className="flex-grow flex flex-col justify-center">
                     <div className={`border rounded-lg p-2 mx-0.5 shadow-sm backdrop-blur-[2px] flex flex-col justify-center relative min-h-[90px] ${CARD_THEMES[selectedThemeIndex].isLight
-                        ? 'bg-black/5 border-black/10 text-slate-800'
-                        : 'bg-white/20 border-white/30 text-white'
+                      ? 'bg-black/5 border-black/10 text-slate-800'
+                      : 'bg-white/20 border-white/30 text-white'
                       }`}>
                       {/* Bannière capsule chevauchant le haut */}
                       <div className={`absolute w-[130px] -top-3.5 left-1/2 transform -translate-x-1/2 text-[6px] font-bold py-1 px-3 rounded-full shadow-md tracking-wider whitespace-wrap z-20 ${CARD_THEMES[selectedThemeIndex].isLight
@@ -787,8 +787,8 @@ const Messages = () => {
                       {/* Aperçu de la réponse en direct */}
                       {replyText.trim() && (
                         <div className={`font-bold text-[8px] py-1.5 px-2 rounded-lg shadow-sm mt-2 animate-fadeIn text-center mx-1 break-words ${CARD_THEMES[selectedThemeIndex].isLight
-                            ? 'bg-slate-800 text-white'
-                            : 'bg-white text-[#DDA0DD]'
+                          ? 'bg-slate-800 text-white'
+                          : 'bg-white text-[#DDA0DD]'
                           }`}>
                           {replyText}
                         </div>
