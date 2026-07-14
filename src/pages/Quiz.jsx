@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 const Quiz = () => {
   const [currentStep, setCurrentStep] = useState(1); // 1 = mood selection, 2 = needs, 3 = loading/result
   const [selectedMood, setSelectedMood] = useState('');
-  const [selectedNeed, setSelectedNeed] = useState('');
+  const [_selectedNeed, setSelectedNeed] = useState('');
   const [resultMessage, setResultMessage] = useState('');
   
   const [loading, setLoading] = useState(false);
