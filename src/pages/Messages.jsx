@@ -88,7 +88,11 @@ const Messages = () => {
     setLoading(true);
     setMessagesError('');
     try {
-      const response = await fetch(`/api/messages/${username}`);
+      const response = await fetch(`/api/messages/${username}`, {
+        headers: {
+          'X-User-Auth': username
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setMessages(data);
