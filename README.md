@@ -1,4 +1,4 @@
-# AnonyMots 💖 — Le Frontend (Application React)
+# AnonyMots
 
 Coucou ! Bienvenue dans la partie visible d'AnonyMots. C'est l'application web avec laquelle les utilisateurs interagissent directement pour s'envoyer des mots doux. 
 
